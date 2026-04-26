@@ -1,0 +1,221 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 900" font-family="Inter, Segoe UI, sans-serif">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#06060f"/>
+      <stop offset="100%" stop-color="#0d0d1f"/>
+    </linearGradient>
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000" flood-opacity="0.35"/>
+    </filter>
+    <filter id="glow-blue">
+      <feDropShadow dx="0" dy="0" stdDeviation="4" flood-color="#00d4ff" flood-opacity="0.4"/>
+    </filter>
+    <filter id="glow-purple">
+      <feDropShadow dx="0" dy="0" stdDeviation="4" flood-color="#8b5cf6" flood-opacity="0.4"/>
+    </filter>
+    <filter id="glow-pink">
+      <feDropShadow dx="0" dy="0" stdDeviation="4" flood-color="#ff006e" flood-opacity="0.4"/>
+    </filter>
+    <filter id="glow-green">
+      <feDropShadow dx="0" dy="0" stdDeviation="4" flood-color="#10b981" flood-opacity="0.4"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1400" height="900" fill="url(#bg)" rx="16"/>
+
+  <!-- Title -->
+  <text x="700" y="45" text-anchor="middle" fill="#6366f1" font-size="11" font-weight="700" letter-spacing="3">// ARCHITECTURE ARBORESCENCE</text>
+  <text x="700" y="78" text-anchor="middle" fill="#f1f5f9" font-size="28" font-weight="800" font-family="Space Grotesk, Inter, sans-serif">CodeGuard System Architecture</text>
+  <text x="700" y="102" text-anchor="middle" fill="#94a3b8" font-size="13">Complete module tree — click any node to explore functions and internals</text>
+
+  <!-- CONNECTION LINES: Root to Level 1 -->
+  <path d="M 700 180 C 700 230, 230 230, 230 280" stroke="#00d4ff" stroke-width="2" fill="none" stroke-opacity="0.3"/>
+  <path d="M 700 180 C 700 230, 510 230, 510 280" stroke="#8b5cf6" stroke-width="2" fill="none" stroke-opacity="0.3"/>
+  <path d="M 700 180 C 700 230, 860 230, 860 280" stroke="#ff006e" stroke-width="2" fill="none" stroke-opacity="0.3"/>
+  <path d="M 700 180 C 700 230, 1160 230, 1160 280" stroke="#10b981" stroke-width="2" fill="none" stroke-opacity="0.3"/>
+
+  <!-- CONNECTION LINES: Level 1 to Level 2 -->
+  <!-- Person A children -->
+  <path d="M 230 390 C 230 430, 140 430, 140 470" stroke="#00d4ff" stroke-width="1.5" fill="none" stroke-opacity="0.2"/>
+  <path d="M 230 390 C 230 430, 320 430, 320 470" stroke="#00d4ff" stroke-width="1.5" fill="none" stroke-opacity="0.2"/>
+  <!-- Person B children -->
+  <path d="M 510 390 C 510 430, 430 430, 430 470" stroke="#8b5cf6" stroke-width="1.5" fill="none" stroke-opacity="0.2"/>
+  <path d="M 510 390 C 510 430, 600 430, 600 470" stroke="#8b5cf6" stroke-width="1.5" fill="none" stroke-opacity="0.2"/>
+  <!-- Person C children -->
+  <path d="M 860 390 C 860 430, 780 430, 780 470" stroke="#ff006e" stroke-width="1.5" fill="none" stroke-opacity="0.2"/>
+  <path d="M 860 390 C 860 430, 950 430, 950 470" stroke="#ff006e" stroke-width="1.5" fill="none" stroke-opacity="0.2"/>
+  <!-- Person D children -->
+  <path d="M 1160 390 C 1160 430, 1080 430, 1080 470" stroke="#10b981" stroke-width="1.5" fill="none" stroke-opacity="0.2"/>
+  <path d="M 1160 390 C 1160 430, 1250 430, 1250 470" stroke="#10b981" stroke-width="1.5" fill="none" stroke-opacity="0.2"/>
+
+  <!-- ROOT NODE: CodeGuard -->
+  <g filter="url(#shadow)">
+    <rect x="615" y="125" width="170" height="60" rx="14" fill="#0c0c1c" stroke="#6366f1" stroke-width="2"/>
+    <text x="660" y="162" font-size="22">🛡️</text>
+    <text x="690" y="162" fill="#f1f5f9" font-size="15" font-weight="800" font-family="Space Grotesk, Inter, sans-serif">CodeGuard</text>
+  </g>
+
+  <!-- LEVEL 1: Person A - Project Context -->
+  <g filter="url(#shadow)">
+    <rect x="140" y="280" width="180" height="110" rx="14" fill="#0c0c1c" stroke="#00d4ff" stroke-width="1.8"/>
+    <rect x="140" y="280" width="180" height="4" rx="2" fill="#00d4ff"/>
+    <text x="230" y="315" text-anchor="middle" font-size="24">🗃️</text>
+    <text x="230" y="340" text-anchor="middle" fill="#f1f5f9" font-size="13" font-weight="700">Project Context</text>
+    <rect x="170" y="352" width="120" height="20" rx="5" fill="#00d4ff" fill-opacity="0.1"/>
+    <text x="230" y="366" text-anchor="middle" fill="#00d4ff" font-size="9" font-weight="700">PERSON A</text>
+    <text x="230" y="383" text-anchor="middle" fill="#64748b" font-size="8">Memory Infrastructure</text>
+  </g>
+
+  <!-- LEVEL 1: Person B - Commit Pipeline -->
+  <g filter="url(#shadow)">
+    <rect x="420" y="280" width="180" height="110" rx="14" fill="#0c0c1c" stroke="#8b5cf6" stroke-width="1.8"/>
+    <rect x="420" y="280" width="180" height="4" rx="2" fill="#8b5cf6"/>
+    <text x="510" y="315" text-anchor="middle" font-size="24">📚</text>
+    <text x="510" y="340" text-anchor="middle" fill="#f1f5f9" font-size="13" font-weight="700">Commit Pipeline</text>
+    <rect x="450" y="352" width="120" height="20" rx="5" fill="#8b5cf6" fill-opacity="0.1"/>
+    <text x="510" y="366" text-anchor="middle" fill="#8b5cf6" font-size="9" font-weight="700">PERSON B</text>
+    <text x="510" y="383" text-anchor="middle" fill="#64748b" font-size="8">Learning Pipeline</text>
+  </g>
+
+  <!-- LEVEL 1: Person C - Evaluate Pipeline -->
+  <g filter="url(#shadow)">
+    <rect x="770" y="280" width="180" height="110" rx="14" fill="#0c0c1c" stroke="#ff006e" stroke-width="1.8"/>
+    <rect x="770" y="280" width="180" height="4" rx="2" fill="#ff006e"/>
+    <text x="860" y="315" text-anchor="middle" font-size="24">🔍</text>
+    <text x="860" y="340" text-anchor="middle" fill="#f1f5f9" font-size="13" font-weight="700">Evaluate Pipeline</text>
+    <rect x="800" y="352" width="120" height="20" rx="5" fill="#ff006e" fill-opacity="0.1"/>
+    <text x="860" y="366" text-anchor="middle" fill="#ff006e" font-size="9" font-weight="700">PERSON C</text>
+    <text x="860" y="383" text-anchor="middle" fill="#64748b" font-size="8">PR Review Engine</text>
+  </g>
+
+  <!-- LEVEL 1: Person D - Integration -->
+  <g filter="url(#shadow)">
+    <rect x="1070" y="280" width="180" height="110" rx="14" fill="#0c0c1c" stroke="#10b981" stroke-width="1.8"/>
+    <rect x="1070" y="280" width="180" height="4" rx="2" fill="#10b981"/>
+    <text x="1160" y="315" text-anchor="middle" font-size="24">⚙️</text>
+    <text x="1160" y="340" text-anchor="middle" fill="#f1f5f9" font-size="13" font-weight="700">Integration</text>
+    <rect x="1100" y="352" width="120" height="20" rx="5" fill="#10b981" fill-opacity="0.1"/>
+    <text x="1160" y="366" text-anchor="middle" fill="#10b981" font-size="9" font-weight="700">PERSON D</text>
+    <text x="1160" y="383" text-anchor="middle" fill="#64748b" font-size="8">GitHub + Dashboard</text>
+  </g>
+
+  <!-- LEVEL 2: Person A children -->
+  <g filter="url(#shadow)">
+    <rect x="55" y="470" width="170" height="160" rx="12" fill="#0c0c1c" stroke="#1e1e3a" stroke-width="1.5"/>
+    <rect x="55" y="470" width="170" height="3" rx="2" fill="#00d4ff"/>
+    <text x="140" y="503" text-anchor="middle" font-size="20">🗄️</text>
+    <text x="140" y="525" text-anchor="middle" fill="#f1f5f9" font-size="11" font-weight="700">ChromaDB</text>
+    <text x="140" y="542" text-anchor="middle" fill="#64748b" font-size="8">Vector Store</text>
+    <line x1="75" y1="555" x2="205" y2="555" stroke="#1e1e3a" stroke-width="1"/>
+    <text x="82" y="575" fill="#00d4ff" font-size="8" font-family="JetBrains Mono, monospace">positive</text>
+    <text x="82" y="590" fill="#64748b" font-size="7.5">Good patterns collection</text>
+    <text x="82" y="607" fill="#ef4444" font-size="8" font-family="JetBrains Mono, monospace">negative</text>
+    <text x="82" y="622" fill="#64748b" font-size="7.5">Anti-patterns collection</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="240" y="470" width="170" height="160" rx="12" fill="#0c0c1c" stroke="#1e1e3a" stroke-width="1.5"/>
+    <rect x="240" y="470" width="170" height="3" rx="2" fill="#00d4ff"/>
+    <text x="325" y="503" text-anchor="middle" font-size="20">📋</text>
+    <text x="325" y="525" text-anchor="middle" fill="#f1f5f9" font-size="11" font-weight="700">Guideline Schema</text>
+    <text x="325" y="542" text-anchor="middle" fill="#64748b" font-size="8">Data Model</text>
+    <line x1="260" y1="555" x2="390" y2="555" stroke="#1e1e3a" stroke-width="1"/>
+    <text x="265" y="575" fill="#00d4ff" font-size="7.5" font-family="JetBrains Mono, monospace">pattern_summary</text>
+    <text x="265" y="590" fill="#00d4ff" font-size="7.5" font-family="JetBrains Mono, monospace">reasoning</text>
+    <text x="265" y="605" fill="#00d4ff" font-size="7.5" font-family="JetBrains Mono, monospace">diff_snippet</text>
+    <text x="265" y="620" fill="#00d4ff" font-size="7.5" font-family="JetBrains Mono, monospace">confidence</text>
+  </g>
+
+  <!-- LEVEL 2: Person B children -->
+  <g filter="url(#shadow)">
+    <rect x="345" y="470" width="170" height="160" rx="12" fill="#0c0c1c" stroke="#1e1e3a" stroke-width="1.5"/>
+    <rect x="345" y="470" width="170" height="3" rx="2" fill="#8b5cf6"/>
+    <text x="430" y="503" text-anchor="middle" font-size="20">📡</text>
+    <text x="430" y="525" text-anchor="middle" fill="#f1f5f9" font-size="11" font-weight="700">Signal Extraction</text>
+    <text x="430" y="542" text-anchor="middle" fill="#64748b" font-size="8">Commit Analysis</text>
+    <line x1="365" y1="555" x2="495" y2="555" stroke="#1e1e3a" stroke-width="1"/>
+    <text x="370" y="575" fill="#8b5cf6" font-size="7.5" font-family="JetBrains Mono, monospace">detect_touched_layers()</text>
+    <text x="370" y="590" fill="#8b5cf6" font-size="7.5" font-family="JetBrains Mono, monospace">detect_risky_patterns()</text>
+    <text x="370" y="605" fill="#8b5cf6" font-size="7.5" font-family="JetBrains Mono, monospace">infer_commit_intent()</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="530" y="470" width="170" height="160" rx="12" fill="#0c0c1c" stroke="#1e1e3a" stroke-width="1.5"/>
+    <rect x="530" y="470" width="170" height="3" rx="2" fill="#8b5cf6"/>
+    <text x="615" y="503" text-anchor="middle" font-size="20">🔀</text>
+    <text x="615" y="525" text-anchor="middle" fill="#f1f5f9" font-size="11" font-weight="700">Auto / Heuristic</text>
+    <text x="615" y="542" text-anchor="middle" fill="#64748b" font-size="8">Two Operating Modes</text>
+    <line x1="550" y1="555" x2="680" y2="555" stroke="#1e1e3a" stroke-width="1"/>
+    <text x="555" y="575" fill="#f59e0b" font-size="8" font-weight="600">auto</text>
+    <text x="555" y="590" fill="#64748b" font-size="7.5">LLM first, fallback rules</text>
+    <text x="555" y="610" fill="#10b981" font-size="8" font-weight="600">heuristic</text>
+    <text x="555" y="625" fill="#64748b" font-size="7.5">Rules-only, offline-safe</text>
+  </g>
+
+  <!-- LEVEL 2: Person C children -->
+  <g filter="url(#shadow)">
+    <rect x="695" y="470" width="170" height="160" rx="12" fill="#0c0c1c" stroke="#1e1e3a" stroke-width="1.5"/>
+    <rect x="695" y="470" width="170" height="3" rx="2" fill="#ff006e"/>
+    <text x="780" y="503" text-anchor="middle" font-size="20">🌳</text>
+    <text x="780" y="525" text-anchor="middle" fill="#f1f5f9" font-size="11" font-weight="700">tree-sitter</text>
+    <text x="780" y="542" text-anchor="middle" fill="#64748b" font-size="8">AST Engine</text>
+    <line x1="715" y1="555" x2="845" y2="555" stroke="#1e1e3a" stroke-width="1"/>
+    <text x="720" y="575" fill="#ff006e" font-size="7.5" font-family="JetBrains Mono, monospace">parse_file()</text>
+    <text x="720" y="590" fill="#ff006e" font-size="7.5" font-family="JetBrains Mono, monospace">diff_trees()</text>
+    <text x="720" y="605" fill="#ff006e" font-size="7.5" font-family="JetBrains Mono, monospace">extract_function_bodies()</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="880" y="470" width="170" height="160" rx="12" fill="#0c0c1c" stroke="#1e1e3a" stroke-width="1.5"/>
+    <rect x="880" y="470" width="170" height="3" rx="2" fill="#ff006e"/>
+    <text x="965" y="503" text-anchor="middle" font-size="20">🎯</text>
+    <text x="965" y="525" text-anchor="middle" fill="#f1f5f9" font-size="11" font-weight="700">kNN + Weighting</text>
+    <text x="965" y="542" text-anchor="middle" fill="#64748b" font-size="8">Semantic Retrieval</text>
+    <line x1="900" y1="555" x2="1030" y2="555" stroke="#1e1e3a" stroke-width="1"/>
+    <text x="905" y="575" fill="#ff006e" font-size="7.5" font-family="JetBrains Mono, monospace">cosine_similarity()</text>
+    <text x="905" y="590" fill="#ff006e" font-size="7.5" font-family="JetBrains Mono, monospace">apply_threshold()</text>
+    <text x="905" y="605" fill="#ff006e" font-size="7.5" font-family="JetBrains Mono, monospace">weight_attributes()</text>
+  </g>
+
+  <!-- LEVEL 2: Person D children -->
+  <g filter="url(#shadow)">
+    <rect x="1005" y="470" width="170" height="160" rx="12" fill="#0c0c1c" stroke="#1e1e3a" stroke-width="1.5"/>
+    <rect x="1005" y="470" width="170" height="3" rx="2" fill="#10b981"/>
+    <text x="1090" y="503" text-anchor="middle" font-size="20">🐙</text>
+    <text x="1090" y="525" text-anchor="middle" fill="#f1f5f9" font-size="11" font-weight="700">GitHub Actions</text>
+    <text x="1090" y="542" text-anchor="middle" fill="#64748b" font-size="8">CI/CD Hook</text>
+    <line x1="1025" y1="555" x2="1155" y2="555" stroke="#1e1e3a" stroke-width="1"/>
+    <text x="1030" y="575" fill="#10b981" font-size="7.5" font-family="JetBrains Mono, monospace">on: pull_request</text>
+    <text x="1030" y="590" fill="#10b981" font-size="7.5" font-family="JetBrains Mono, monospace">on: push (main)</text>
+    <text x="1030" y="605" fill="#10b981" font-size="7.5" font-family="JetBrains Mono, monospace">status check</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="1190" y="470" width="170" height="160" rx="12" fill="#0c0c1c" stroke="#1e1e3a" stroke-width="1.5"/>
+    <rect x="1190" y="470" width="170" height="3" rx="2" fill="#10b981"/>
+    <text x="1275" y="503" text-anchor="middle" font-size="20">❌</text>
+    <text x="1275" y="525" text-anchor="middle" fill="#f1f5f9" font-size="11" font-weight="700">Dismissals</text>
+    <text x="1275" y="542" text-anchor="middle" fill="#64748b" font-size="8">Feedback Loop</text>
+    <line x1="1210" y1="555" x2="1340" y2="555" stroke="#1e1e3a" stroke-width="1"/>
+    <text x="1215" y="575" fill="#10b981" font-size="7.5" font-family="JetBrains Mono, monospace">dismiss_attribute()</text>
+    <text x="1215" y="590" fill="#10b981" font-size="7.5" font-family="JetBrains Mono, monospace">suppress_check()</text>
+    <text x="1215" y="610" fill="#64748b" font-size="7.5">Generalizes across</text>
+    <text x="1215" y="623" fill="#64748b" font-size="7.5">similar functions</text>
+  </g>
+
+  <!-- Legend -->
+  <rect x="60" y="680" width="1280" height="70" rx="12" fill="#0c0c1c" stroke="#1e1e3a" stroke-width="1"/>
+  <text x="700" y="703" text-anchor="middle" fill="#6366f1" font-size="10" font-weight="700" letter-spacing="2">TEAM COLOR LEGEND</text>
+  <circle cx="200" cy="730" r="8" fill="#00d4ff" fill-opacity="0.2" stroke="#00d4ff" stroke-width="1.5"/>
+  <text x="215" y="734" fill="#00d4ff" font-size="10" font-weight="600">Person A — Project Context Lead</text>
+  <circle cx="530" cy="730" r="8" fill="#8b5cf6" fill-opacity="0.2" stroke="#8b5cf6" stroke-width="1.5"/>
+  <text x="545" y="734" fill="#8b5cf6" font-size="10" font-weight="600">Person B — Learning Pipeline Lead</text>
+  <circle cx="860" cy="730" r="8" fill="#ff006e" fill-opacity="0.2" stroke="#ff006e" stroke-width="1.5"/>
+  <text x="875" y="734" fill="#ff006e" font-size="10" font-weight="600">Person C — Evaluate Pipeline Lead</text>
+  <circle cx="1140" cy="730" r="8" fill="#10b981" fill-opacity="0.2" stroke="#10b981" stroke-width="1.5"/>
+  <text x="1155" y="734" fill="#10b981" font-size="10" font-weight="600">Person D — Integration Lead</text>
+
+  <!-- Branding -->
+  <text x="700" y="790" text-anchor="middle" fill="#334155" font-size="10">CodeGuard — System Architecture | LA Hacks 2026</text>
+</svg>
