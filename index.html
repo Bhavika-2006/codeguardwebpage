@@ -1,0 +1,1660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DeepWiki Explorer - Intern Journey</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg-dark: #0a0a1a;
+      --bg-card: rgba(15, 15, 35, 0.85);
+      --glass: rgba(255, 255, 255, 0.05);
+      --glass-border: rgba(255, 255, 255, 0.1);
+      --accent-1: #6366f1;
+      --accent-2: #8b5cf6;
+      --accent-3: #a78bfa;
+      --accent-4: #c084fc;
+      --neon-blue: #00d4ff;
+      --neon-purple: #b400ff;
+      --neon-pink: #ff006e;
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --success: #10b981;
+      --warning: #f59e0b;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-dark);
+      color: var(--text-primary);
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
+
+    /* ===== THREE.JS CANVAS ===== */
+    #three-canvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* ===== HERO SECTION ===== */
+    .hero {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 2rem;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1.2rem;
+      border-radius: 100px;
+      background: linear-gradient(135deg, rgba(99,102,241,0.15), rgba(139,92,246,0.15));
+      border: 1px solid rgba(99,102,241,0.3);
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--accent-3);
+      margin-bottom: 2rem;
+      backdrop-filter: blur(10px);
+      animation: fadeInDown 0.8s ease-out;
+    }
+
+    .hero-badge .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--success);
+      animation: pulse-dot 2s infinite;
+    }
+
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(1.3); }
+    }
+
+    .hero h1 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(3rem, 8vw, 6rem);
+      font-weight: 900;
+      line-height: 1.05;
+      margin-bottom: 1.5rem;
+      animation: fadeInUp 1s ease-out 0.2s both;
+    }
+
+    .hero h1 .gradient-text {
+      background: linear-gradient(135deg, var(--neon-blue), var(--accent-2), var(--neon-pink));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero h1 .line2 {
+      display: block;
+      font-size: 0.6em;
+      font-weight: 600;
+      color: var(--text-secondary);
+      -webkit-text-fill-color: var(--text-secondary);
+    }
+
+    .hero-subtitle {
+      font-size: 1.25rem;
+      color: var(--text-secondary);
+      max-width: 600px;
+      margin-bottom: 2.5rem;
+      line-height: 1.7;
+      animation: fadeInUp 1s ease-out 0.4s both;
+    }
+
+    .hero-cta {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      animation: fadeInUp 1s ease-out 0.6s both;
+    }
+
+    .btn {
+      padding: 0.85rem 2rem;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      border: none;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+      color: white;
+      box-shadow: 0 4px 20px rgba(99,102,241,0.4);
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(99,102,241,0.6);
+    }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--text-primary);
+      border: 1px solid var(--glass-border);
+      backdrop-filter: blur(10px);
+    }
+    .btn-outline:hover {
+      background: var(--glass);
+      border-color: var(--accent-3);
+    }
+
+    /* ===== SCROLL INDICATOR ===== */
+    .scroll-indicator {
+      position: absolute;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      animation: bounce 2s infinite;
+    }
+    .scroll-indicator svg {
+      width: 30px; height: 30px;
+      stroke: var(--text-muted);
+      fill: none;
+      stroke-width: 2;
+    }
+    @keyframes bounce {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50% { transform: translateX(-50%) translateY(10px); }
+    }
+
+    /* ===== SECTION STYLES ===== */
+    section {
+      position: relative;
+      z-index: 1;
+      padding: 6rem 2rem;
+    }
+
+    .section-container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .section-header {
+      text-align: center;
+      margin-bottom: 4rem;
+    }
+
+    .section-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--accent-3);
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      margin-bottom: 1rem;
+      display: block;
+    }
+
+    .section-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 800;
+      margin-bottom: 1rem;
+    }
+
+    .section-subtitle {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      max-width: 600px;
+      margin: 0 auto;
+      line-height: 1.7;
+    }
+
+    /* ===== CAPABILITIES CARDS ===== */
+    .capabilities-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .cap-card {
+      background: var(--bg-card);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      padding: 2rem;
+      backdrop-filter: blur(20px);
+      transition: all 0.4s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cap-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 3px;
+      background: linear-gradient(90deg, var(--accent-1), var(--accent-4));
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .cap-card:hover {
+      transform: translateY(-5px);
+      border-color: rgba(99,102,241,0.3);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+    .cap-card:hover::before { opacity: 1; }
+
+    .cap-icon {
+      width: 56px; height: 56px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      margin-bottom: 1.2rem;
+    }
+
+    .cap-icon.blue { background: linear-gradient(135deg, rgba(0,212,255,0.15), rgba(0,212,255,0.05)); color: var(--neon-blue); }
+    .cap-icon.purple { background: linear-gradient(135deg, rgba(139,92,246,0.15), rgba(139,92,246,0.05)); color: var(--accent-2); }
+    .cap-icon.pink { background: linear-gradient(135deg, rgba(255,0,110,0.15), rgba(255,0,110,0.05)); color: var(--neon-pink); }
+
+    .cap-card h3 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 0.7rem;
+    }
+
+    .cap-card p {
+      color: var(--text-secondary);
+      line-height: 1.7;
+      font-size: 0.95rem;
+    }
+
+    .cap-card .code-snippet {
+      margin-top: 1rem;
+      background: rgba(0,0,0,0.4);
+      border-radius: 10px;
+      padding: 1rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      color: var(--accent-3);
+      border: 1px solid rgba(255,255,255,0.05);
+      overflow-x: auto;
+      white-space: pre;
+    }
+
+    /* ===== INTERN STORY TIMELINE ===== */
+    .story-section {
+      background: linear-gradient(180deg, transparent, rgba(99,102,241,0.03), transparent);
+    }
+
+    .timeline {
+      position: relative;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 30px;
+      top: 0; bottom: 0;
+      width: 2px;
+      background: linear-gradient(180deg, var(--accent-1), var(--accent-4), transparent);
+    }
+
+    .timeline-item {
+      position: relative;
+      padding-left: 80px;
+      margin-bottom: 3rem;
+      opacity: 0;
+      transform: translateX(-20px);
+      animation: slideInTimeline 0.6s ease-out forwards;
+    }
+
+    .timeline-item:nth-child(1) { animation-delay: 0.1s; }
+    .timeline-item:nth-child(2) { animation-delay: 0.3s; }
+    .timeline-item:nth-child(3) { animation-delay: 0.5s; }
+    .timeline-item:nth-child(4) { animation-delay: 0.7s; }
+    .timeline-item:nth-child(5) { animation-delay: 0.9s; }
+
+    @keyframes slideInTimeline {
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    .timeline-dot {
+      position: absolute;
+      left: 20px;
+      top: 5px;
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      background: var(--accent-1);
+      border: 3px solid var(--bg-dark);
+      box-shadow: 0 0 15px rgba(99,102,241,0.5);
+    }
+
+    .timeline-content {
+      background: var(--bg-card);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      padding: 1.5rem;
+      backdrop-filter: blur(20px);
+    }
+
+    .timeline-step {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--accent-3);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 0.5rem;
+    }
+
+    .timeline-content h3 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .timeline-content p {
+      color: var(--text-secondary);
+      line-height: 1.6;
+      font-size: 0.9rem;
+    }
+
+    /* ===== ARBORESCENCE / TREE SECTION ===== */
+    .tree-section {
+      min-height: 100vh;
+      padding: 4rem 1rem;
+    }
+
+    .tree-container {
+      position: relative;
+      width: 100%;
+      max-width: 1400px;
+      margin: 0 auto;
+      min-height: 700px;
+    }
+
+    /* SVG tree lines */
+    .tree-svg {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .tree-line {
+      stroke: rgba(99, 102, 241, 0.3);
+      stroke-width: 2;
+      fill: none;
+      filter: drop-shadow(0 0 4px rgba(99,102,241,0.2));
+      transition: stroke 0.3s;
+    }
+
+    .tree-line.active {
+      stroke: var(--neon-blue);
+      stroke-width: 3;
+      filter: drop-shadow(0 0 8px rgba(0,212,255,0.5));
+    }
+
+    /* Tree nodes */
+    .tree-node {
+      position: absolute;
+      cursor: pointer;
+      z-index: 2;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .node-inner {
+      background: var(--bg-card);
+      border: 2px solid var(--glass-border);
+      border-radius: 16px;
+      padding: 1rem 1.5rem;
+      backdrop-filter: blur(20px);
+      text-align: center;
+      transition: all 0.3s ease;
+      min-width: 140px;
+      position: relative;
+    }
+
+    .tree-node:hover .node-inner,
+    .tree-node.active .node-inner {
+      border-color: var(--accent-2);
+      box-shadow: 0 0 30px rgba(139,92,246,0.3), 0 10px 40px rgba(0,0,0,0.3);
+      transform: scale(1.05);
+    }
+
+    .tree-node.active .node-inner {
+      border-color: var(--neon-blue);
+      box-shadow: 0 0 40px rgba(0,212,255,0.3), 0 10px 40px rgba(0,0,0,0.3);
+    }
+
+    .node-icon {
+      font-size: 1.8rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .node-label {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: 0.9rem;
+      white-space: nowrap;
+    }
+
+    .node-sublabel {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      margin-top: 0.2rem;
+    }
+
+    /* Pulse ring on active node */
+    .tree-node.active .node-inner::after {
+      content: '';
+      position: absolute;
+      inset: -6px;
+      border-radius: 20px;
+      border: 2px solid var(--neon-blue);
+      animation: pulse-ring 2s infinite;
+    }
+
+    @keyframes pulse-ring {
+      0% { opacity: 1; transform: scale(1); }
+      100% { opacity: 0; transform: scale(1.15); }
+    }
+
+    /* ===== NODE POPUP / DETAIL PANEL ===== */
+    .node-popup {
+      position: fixed;
+      top: 0; right: -500px;
+      width: 460px;
+      height: 100vh;
+      background: rgba(10, 10, 30, 0.95);
+      border-left: 1px solid var(--glass-border);
+      backdrop-filter: blur(30px);
+      z-index: 1000;
+      padding: 2rem;
+      overflow-y: auto;
+      transition: right 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .node-popup.open {
+      right: 0;
+      box-shadow: -20px 0 60px rgba(0,0,0,0.5);
+    }
+
+    .popup-close {
+      position: absolute;
+      top: 1.5rem; right: 1.5rem;
+      width: 36px; height: 36px;
+      border-radius: 10px;
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      color: var(--text-primary);
+      font-size: 1.2rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+    .popup-close:hover {
+      background: rgba(255,0,110,0.15);
+      border-color: var(--neon-pink);
+    }
+
+    .popup-header {
+      margin-bottom: 2rem;
+      padding-right: 3rem;
+    }
+
+    .popup-header .popup-icon {
+      font-size: 2.5rem;
+      margin-bottom: 0.8rem;
+    }
+
+    .popup-header h2 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.8rem;
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+    }
+
+    .popup-header p {
+      color: var(--text-secondary);
+      line-height: 1.6;
+      font-size: 0.9rem;
+    }
+
+    .popup-functions-title {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--accent-3);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 1rem;
+    }
+
+    .func-item {
+      background: rgba(0,0,0,0.3);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 12px;
+      padding: 1rem;
+      margin-bottom: 0.75rem;
+      transition: all 0.3s;
+    }
+
+    .func-item:hover {
+      border-color: rgba(99,102,241,0.3);
+      background: rgba(99,102,241,0.05);
+    }
+
+    .func-name {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--neon-blue);
+      margin-bottom: 0.3rem;
+    }
+
+    .func-desc {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    .func-tag {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      border-radius: 6px;
+      font-size: 0.65rem;
+      font-weight: 600;
+      margin-top: 0.4rem;
+      margin-right: 0.3rem;
+    }
+
+    .func-tag.core { background: rgba(99,102,241,0.15); color: var(--accent-3); }
+    .func-tag.hook { background: rgba(16,185,129,0.15); color: var(--success); }
+    .func-tag.api { background: rgba(245,158,11,0.15); color: var(--warning); }
+    .func-tag.render { background: rgba(255,0,110,0.15); color: var(--neon-pink); }
+
+    /* ===== DATA SHOWCASE ===== */
+    .data-showcase {
+      background: linear-gradient(180deg, transparent, rgba(0,212,255,0.02), transparent);
+    }
+
+    .data-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+
+    @media (max-width: 768px) {
+      .data-grid { grid-template-columns: 1fr; }
+    }
+
+    .data-card {
+      background: var(--bg-card);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      overflow: hidden;
+      backdrop-filter: blur(20px);
+    }
+
+    .data-card-header {
+      padding: 1rem 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      border-bottom: 1px solid var(--glass-border);
+    }
+
+    .data-card-header .tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      padding: 0.3rem 0.7rem;
+      border-radius: 6px;
+      font-weight: 600;
+    }
+
+    .tag.get { background: rgba(16,185,129,0.15); color: var(--success); }
+    .tag.post { background: rgba(245,158,11,0.15); color: var(--warning); }
+    .tag.struct { background: rgba(99,102,241,0.15); color: var(--accent-3); }
+    .tag.query { background: rgba(0,212,255,0.15); color: var(--neon-blue); }
+
+    .data-card-header h4 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: 1rem;
+    }
+
+    .data-card-body {
+      padding: 1.2rem 1.5rem;
+    }
+
+    .data-card-body pre {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      line-height: 1.7;
+      color: var(--text-secondary);
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .data-card-body pre .key { color: var(--neon-blue); }
+    .data-card-body pre .val { color: var(--accent-3); }
+    .data-card-body pre .str { color: var(--success); }
+    .data-card-body pre .comment { color: var(--text-muted); font-style: italic; }
+
+    /* ===== FOOTER ===== */
+    footer {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 4rem 2rem;
+      border-top: 1px solid var(--glass-border);
+    }
+
+    footer p {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+
+    footer .footer-brand {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 800;
+      font-size: 1.2rem;
+      background: linear-gradient(135deg, var(--neon-blue), var(--accent-2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+
+    /* ===== ANIMATIONS ===== */
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .fade-in {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: all 0.8s ease-out;
+    }
+
+    .fade-in.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ===== NAV ===== */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 500;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      backdrop-filter: blur(20px);
+      background: rgba(10,10,26,0.7);
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      transition: all 0.3s;
+    }
+
+    nav.scrolled {
+      background: rgba(10,10,26,0.95);
+    }
+
+    .nav-brand {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 800;
+      font-size: 1.3rem;
+      background: linear-gradient(135deg, var(--neon-blue), var(--accent-2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text-primary); }
+
+    /* ===== REPO SELECTOR ===== */
+    .repo-selector {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 2rem;
+    }
+
+    .repo-chip {
+      padding: 0.6rem 1.2rem;
+      border-radius: 100px;
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .repo-chip:hover, .repo-chip.active {
+      background: linear-gradient(135deg, rgba(99,102,241,0.2), rgba(139,92,246,0.2));
+      border-color: var(--accent-2);
+      color: var(--text-primary);
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .node-popup { width: 100%; right: -100%; }
+      .capabilities-grid { grid-template-columns: 1fr; }
+      .tree-container { transform: scale(0.7); transform-origin: top center; }
+    }
+
+    /* ===== LOADING OVERLAY ===== */
+    .loading-overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--bg-dark);
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.8s, visibility 0.8s;
+    }
+
+    .loading-overlay.hidden {
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    .loading-spinner {
+      width: 60px; height: 60px;
+      border-radius: 50%;
+      border: 3px solid var(--glass-border);
+      border-top-color: var(--neon-blue);
+      animation: spin 1s linear infinite;
+      margin-bottom: 1.5rem;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .loading-text {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Loading -->
+  <div class="loading-overlay" id="loader">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">Initializing DeepWiki Explorer...</div>
+  </div>
+
+  <!-- Three.js Background -->
+  <canvas id="three-canvas"></canvas>
+
+  <!-- Nav -->
+  <nav id="navbar">
+    <div class="nav-brand">DeepWiki Explorer</div>
+    <ul class="nav-links">
+      <li><a href="#capabilities">Capabilities</a></li>
+      <li><a href="#story">Intern Story</a></li>
+      <li><a href="#arborescence">Arborescence</a></li>
+      <li><a href="#data">Live Data</a></li>
+    </ul>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero" id="hero">
+    <div class="hero-badge">
+      <span class="dot"></span>
+      DeepWiki MCP Integration Active
+    </div>
+    <h1>
+      <span class="gradient-text">DeepWiki Explorer</span>
+      <span class="line2">Navigate Code Knowledge Like Never Before</span>
+    </h1>
+    <p class="hero-subtitle">
+      An immersive 3D journey through repository knowledge. Explore architecture, 
+      discover functions, and trace the intern's path through codebases with AI-powered insights.
+    </p>
+    <div class="hero-cta">
+      <a href="#arborescence" class="btn btn-primary">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 6v6m-7-7h6m6 0h6"/></svg>
+        Explore the Tree
+      </a>
+      <a href="#capabilities" class="btn btn-outline">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        View Capabilities
+      </a>
+    </div>
+    <div class="scroll-indicator">
+      <svg viewBox="0 0 24 24"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
+    </div>
+  </section>
+
+  <!-- Capabilities Section -->
+  <section id="capabilities" class="fade-in">
+    <div class="section-container">
+      <div class="section-header">
+        <span class="section-label">// capabilities</span>
+        <h2 class="section-title">What DeepWiki MCP Can Do</h2>
+        <p class="section-subtitle">Three powerful tools to explore any GitHub repository's documentation with AI-powered insights</p>
+      </div>
+      <div class="capabilities-grid">
+        <div class="cap-card">
+          <div class="cap-icon blue">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z"/></svg>
+          </div>
+          <h3>read_wiki_structure</h3>
+          <p>Get a complete table of contents for any repo's auto-generated wiki. Instantly see all topics and sub-topics organized hierarchically.</p>
+          <div class="code-snippet">// Example: React's wiki structure
+{
+  "4 React Reconciler": [
+    "4.1 Fiber Architecture",
+    "4.2 Work Loop & Rendering",
+    "4.3 React Hooks System",
+    "4.4 Lane-Based Scheduling"
+  ]
+}</div>
+        </div>
+        <div class="cap-card">
+          <div class="cap-icon purple">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          </div>
+          <h3>read_wiki_contents</h3>
+          <p>Fetch full AI-generated documentation pages with architecture diagrams, source references, code examples, and relationship maps.</p>
+          <div class="code-snippet">// Example: Three.js architecture
+"Three.js follows a modular,
+layered architecture:
+1. Data vs. Rendering separation
+2. Declarative Scene Graph
+3. Extensibility via Materials
+4. Multiple Build Targets"</div>
+        </div>
+        <div class="cap-card">
+          <div class="cap-icon pink">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          </div>
+          <h3>ask_question</h3>
+          <p>Ask any natural language question about a repository and get an AI-powered, context-grounded response with source references.</p>
+          <div class="code-snippet">// Q: "What are React's main
+//     architectural components?"
+// A: "React's architecture is
+//  composed of the Reconciler
+//  and platform-specific
+//  renderers..."</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Intern Story Section -->
+  <section id="story" class="story-section fade-in">
+    <div class="section-container">
+      <div class="section-header">
+        <span class="section-label">// the intern journey</span>
+        <h2 class="section-title">How an Intern Uses DeepWiki</h2>
+        <p class="section-subtitle">Follow the story of navigating a new codebase on day one, powered by DeepWiki MCP</p>
+      </div>
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-content">
+            <div class="timeline-step">Step 01 - Discovery</div>
+            <h3>Mapping the Unknown</h3>
+            <p>The intern runs <code>read_wiki_structure("facebook/react")</code> and instantly sees the entire codebase organized into 10 major topics with 25+ sub-pages. No more digging through thousands of files blindly.</p>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot" style="background: var(--accent-2);"></div>
+          <div class="timeline-content">
+            <div class="timeline-step">Step 02 - Deep Dive</div>
+            <h3>Understanding Architecture</h3>
+            <p>Using <code>read_wiki_contents</code>, they pull full documentation on the React Reconciler - learning about Fiber trees, the work loop, and how hooks are managed, all with source file references.</p>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot" style="background: var(--accent-4);"></div>
+          <div class="timeline-content">
+            <div class="timeline-step">Step 03 - Questioning</div>
+            <h3>Asking the Right Questions</h3>
+            <p>With <code>ask_question</code>, the intern asks "How does the lane-based priority system work?" and gets a detailed AI-generated explanation with code references and architecture diagrams.</p>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot" style="background: var(--neon-blue);"></div>
+          <div class="timeline-content">
+            <div class="timeline-step">Step 04 - Connection</div>
+            <h3>Building Mental Models</h3>
+            <p>The intern starts connecting concepts: the Fiber tree feeds the Work Loop, which uses Lane-Based Scheduling to prioritize updates. The arborescence becomes clear - every piece fits.</p>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot" style="background: var(--neon-pink);"></div>
+          <div class="timeline-content">
+            <div class="timeline-step">Step 05 - Contribution</div>
+            <h3>Making Impact</h3>
+            <p>Armed with deep knowledge of the codebase's history and architecture, the intern submits their first PR with confidence - understanding not just what to change, but why the system works the way it does.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Arborescence Section -->
+  <section id="arborescence" class="tree-section fade-in">
+    <div class="section-container">
+      <div class="section-header">
+        <span class="section-label">// arborescence</span>
+        <h2 class="section-title">Interactive Code Tree</h2>
+        <p class="section-subtitle">Click any node to explore the functions and internals within each module</p>
+      </div>
+      <div class="repo-selector">
+        <button class="repo-chip active" data-repo="react">facebook/react</button>
+        <button class="repo-chip" data-repo="flask">pallets/flask</button>
+        <button class="repo-chip" data-repo="threejs">mrdoob/three.js</button>
+      </div>
+      <div class="tree-container" id="treeContainer">
+        <!-- Tree nodes and lines rendered by JS -->
+      </div>
+    </div>
+  </section>
+
+  <!-- Live Data Showcase -->
+  <section id="data" class="data-showcase fade-in">
+    <div class="section-container">
+      <div class="section-header">
+        <span class="section-label">// live data</span>
+        <h2 class="section-title">Real DeepWiki Responses</h2>
+        <p class="section-subtitle">Actual data fetched from DeepWiki MCP during this session</p>
+      </div>
+      <div class="data-grid">
+        <div class="data-card">
+          <div class="data-card-header">
+            <span class="tag get">GET</span>
+            <h4>Wiki Structure - React</h4>
+          </div>
+          <div class="data-card-body">
+<pre><span class="comment">// read_wiki_structure("facebook/react")</span>
+
+<span class="key">1</span>  Overview
+  <span class="val">1.1</span> Repository Structure
+<span class="key">4</span>  React Reconciler
+  <span class="val">4.1</span> Fiber Architecture
+  <span class="val">4.2</span> Work Loop & Rendering
+  <span class="val">4.3</span> <span class="str">React Hooks System</span>
+  <span class="val">4.4</span> Lane-Based Scheduling
+<span class="key">5</span>  Server-Side Rendering
+  <span class="val">5.1</span> React Fizz (Streaming)
+  <span class="val">5.2</span> Server Components
+<span class="key">8</span>  React Compiler
+  <span class="val">8.1</span> Architecture & Pipeline</pre>
+          </div>
+        </div>
+        <div class="data-card">
+          <div class="data-card-header">
+            <span class="tag query">QUERY</span>
+            <h4>Ask Question - React Architecture</h4>
+          </div>
+          <div class="data-card-body">
+<pre><span class="comment">// ask_question("facebook/react",
+//   "Main architectural components?")</span>
+
+<span class="str">"React's architecture is composed
+of the Reconciler and platform-
+specific renderers."</span>
+
+<span class="key">Reconciler:</span>
+  <span class="val">- Virtual Tree Management</span>
+  <span class="val">- Work Scheduling (lanes)</span>
+  <span class="val">- Reconciliation (diffing)</span>
+  <span class="val">- Effects Coordination</span>
+
+<span class="key">Rendering Pipeline:</span>
+  <span class="val">1. Render Phase</span> (interruptible)
+  <span class="val">2. Commit Phase</span> (synchronous)
+  <span class="val">3. Passive Effects</span> (async)</pre>
+          </div>
+        </div>
+        <div class="data-card">
+          <div class="data-card-header">
+            <span class="tag struct">STRUCT</span>
+            <h4>Wiki Contents - Three.js</h4>
+          </div>
+          <div class="data-card-body">
+<pre><span class="comment">// read_wiki_contents("mrdoob/three.js")</span>
+
+<span class="key">Architecture Layers:</span>
+  <span class="str">"Modular, layered design"</span>
+
+  <span class="val">1.</span> Data vs Rendering separation
+  <span class="val">2.</span> Declarative Scene Graph
+  <span class="val">3.</span> Extensibility (Materials)
+  <span class="val">4.</span> Multiple Build Targets
+
+<span class="key">Distribution:</span>
+  <span class="val">three.module.js</span>  - ES Module
+  <span class="val">three.cjs</span>        - CommonJS
+  <span class="val">three.webgpu.js</span>  - WebGPU</pre>
+          </div>
+        </div>
+        <div class="data-card">
+          <div class="data-card-header">
+            <span class="tag post">QUERY</span>
+            <h4>Flask Modules - Key Functions</h4>
+          </div>
+          <div class="data-card-body">
+<pre><span class="comment">// ask_question("pallets/flask",
+//   "Main modules and key functions?")</span>
+
+<span class="key">Flask App Object</span> (app.py)
+  <span class="val">Flask(__name__)</span>
+  <span class="val">@app.route("/")</span>
+  <span class="val">app.config</span>
+
+<span class="key">Context System</span>
+  <span class="val">current_app</span>  - active app proxy
+  <span class="val">g</span>            - request globals
+  <span class="val">request</span>      - incoming data
+  <span class="val">session</span>      - user session
+
+<span class="key">Blueprints</span> (blueprints.py)
+  <span class="val">Blueprint('auth', __name__)</span>
+  <span class="val">app.register_blueprint(bp)</span></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <span class="footer-brand">DeepWiki Explorer</span>
+    <p>Built with Three.js, DeepWiki MCP, and a lot of curiosity</p>
+    <p style="margin-top: 0.5rem;">Powered by AI-driven repository intelligence</p>
+  </footer>
+
+  <!-- Node Detail Popup (slide-in panel) -->
+  <div class="node-popup" id="nodePopup">
+    <button class="popup-close" id="popupClose">&times;</button>
+    <div class="popup-header">
+      <div class="popup-icon" id="popupIcon"></div>
+      <h2 id="popupTitle"></h2>
+      <p id="popupDesc"></p>
+    </div>
+    <div class="popup-functions-title">Functions & Internals</div>
+    <div id="popupFunctions"></div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script>
+    // ===== THREE.JS 3D BACKGROUND =====
+    (function initThreeBackground() {
+      const canvas = document.getElementById('three-canvas');
+      const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+      camera.position.z = 30;
+
+      // Particle system
+      const particleCount = 1500;
+      const positions = new Float32Array(particleCount * 3);
+      const colors = new Float32Array(particleCount * 3);
+      const sizes = new Float32Array(particleCount);
+
+      const palette = [
+        [0.39, 0.4, 0.95],   // indigo
+        [0.55, 0.36, 0.96],  // purple
+        [0.0, 0.83, 1.0],    // cyan
+        [1.0, 0.0, 0.43],    // pink
+        [0.06, 0.73, 0.51],  // green
+      ];
+
+      for (let i = 0; i < particleCount; i++) {
+        positions[i * 3] = (Math.random() - 0.5) * 80;
+        positions[i * 3 + 1] = (Math.random() - 0.5) * 80;
+        positions[i * 3 + 2] = (Math.random() - 0.5) * 80;
+
+        const c = palette[Math.floor(Math.random() * palette.length)];
+        colors[i * 3] = c[0];
+        colors[i * 3 + 1] = c[1];
+        colors[i * 3 + 2] = c[2];
+
+        sizes[i] = Math.random() * 2 + 0.5;
+      }
+
+      const geometry = new THREE.BufferGeometry();
+      geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+      geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+      geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+
+      const material = new THREE.PointsMaterial({
+        size: 0.15,
+        vertexColors: true,
+        transparent: true,
+        opacity: 0.6,
+        blending: THREE.AdditiveBlending,
+        sizeAttenuation: true,
+      });
+
+      const particles = new THREE.Points(geometry, material);
+      scene.add(particles);
+
+      // Wireframe torus knot
+      const torusGeo = new THREE.TorusKnotGeometry(8, 2.5, 100, 16);
+      const torusMat = new THREE.MeshBasicMaterial({
+        color: 0x6366f1,
+        wireframe: true,
+        transparent: true,
+        opacity: 0.06,
+      });
+      const torus = new THREE.Mesh(torusGeo, torusMat);
+      torus.position.set(15, -5, -20);
+      scene.add(torus);
+
+      // Icosahedron
+      const icoGeo = new THREE.IcosahedronGeometry(5, 1);
+      const icoMat = new THREE.MeshBasicMaterial({
+        color: 0x00d4ff,
+        wireframe: true,
+        transparent: true,
+        opacity: 0.08,
+      });
+      const ico = new THREE.Mesh(icoGeo, icoMat);
+      ico.position.set(-18, 10, -15);
+      scene.add(ico);
+
+      // Mouse interaction
+      let mouseX = 0, mouseY = 0;
+      document.addEventListener('mousemove', e => {
+        mouseX = (e.clientX / window.innerWidth - 0.5) * 2;
+        mouseY = (e.clientY / window.innerHeight - 0.5) * 2;
+      });
+
+      function animate() {
+        requestAnimationFrame(animate);
+        const time = Date.now() * 0.0005;
+
+        particles.rotation.y = time * 0.1 + mouseX * 0.1;
+        particles.rotation.x = mouseY * 0.05;
+
+        torus.rotation.x = time * 0.3;
+        torus.rotation.y = time * 0.2;
+
+        ico.rotation.x = time * 0.4;
+        ico.rotation.z = time * 0.15;
+
+        camera.position.x += (mouseX * 3 - camera.position.x) * 0.02;
+        camera.position.y += (-mouseY * 3 - camera.position.y) * 0.02;
+        camera.lookAt(scene.position);
+
+        renderer.render(scene, camera);
+      }
+      animate();
+
+      window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      });
+    })();
+
+    // ===== ARBORESCENCE DATA =====
+    const treeData = {
+      react: {
+        root: { id: 'root', icon: '\u269B\uFE0F', label: 'React', sub: 'facebook/react', x: 50, y: 5 },
+        children: [
+          {
+            id: 'reconciler', icon: '\u2699\uFE0F', label: 'Reconciler', sub: 'Core Engine', x: 20, y: 22,
+            functions: [
+              { name: 'beginWork()', desc: 'Traverses down the Fiber tree, reconciling children and determining updates', tags: ['core', 'render'] },
+              { name: 'completeWork()', desc: 'Traverses up the tree, creating/updating host instances', tags: ['core', 'render'] },
+              { name: 'commitWork()', desc: 'Applies all DOM mutations synchronously in the commit phase', tags: ['core'] },
+              { name: 'scheduleUpdateOnFiber()', desc: 'Initiates update scheduling using the lane priority system', tags: ['core'] },
+            ],
+            description: 'The React Reconciler is the core engine managing virtual tree diffing, work scheduling, and coordinating updates across platform-specific renderers.'
+          },
+          {
+            id: 'hooks', icon: '\uD83E\uDE9D', label: 'Hooks System', sub: 'State & Effects', x: 50, y: 22,
+            functions: [
+              { name: 'useState()', desc: 'Manages local state with dispatch-based updates queued on fibers', tags: ['hook', 'api'] },
+              { name: 'useEffect()', desc: 'Schedules passive effects that run asynchronously after paint', tags: ['hook', 'api'] },
+              { name: 'useReducer()', desc: 'Alternative to useState for complex state with reducer pattern', tags: ['hook', 'api'] },
+              { name: 'useMemo()', desc: 'Memoizes expensive computations between renders', tags: ['hook'] },
+              { name: 'useCallback()', desc: 'Memoizes callback functions to prevent unnecessary re-renders', tags: ['hook'] },
+            ],
+            description: 'The Hooks System manages state and side effects in function components, providing a clean API for stateful logic without class components.'
+          },
+          {
+            id: 'ssr', icon: '\uD83C\uDF10', label: 'SSR', sub: 'Server Rendering', x: 80, y: 22,
+            functions: [
+              { name: 'renderToPipeableStream()', desc: 'Streaming SSR with Suspense support via React Fizz', tags: ['api', 'render'] },
+              { name: 'hydrateRoot()', desc: 'Client-side hydration that attaches to server-rendered HTML', tags: ['api', 'render'] },
+              { name: 'use()', desc: 'Reads async resources within Server Components', tags: ['hook', 'api'] },
+            ],
+            description: 'Server-Side Rendering with React Fizz for streaming HTML and Flight for Server Components, enabling faster page loads.'
+          },
+        ],
+        level2: [
+          {
+            id: 'fiber', icon: '\uD83C\uDFF7\uFE0F', label: 'Fiber Tree', sub: 'Data Structure', x: 8, y: 42, parent: 'reconciler',
+            functions: [
+              { name: 'createFiber()', desc: 'Creates a new Fiber node with tag, pending props, and key', tags: ['core'] },
+              { name: 'createWorkInProgress()', desc: 'Creates the alternate fiber for double-buffering', tags: ['core'] },
+              { name: 'cloneChildFibers()', desc: 'Clones child fiber subtrees during reconciliation', tags: ['core'] },
+            ],
+            description: 'The Fiber tree is a linked-list data structure where each node represents a unit of work with metadata about components and their state.'
+          },
+          {
+            id: 'lanes', icon: '\uD83D\uDEE3\uFE0F', label: 'Lanes', sub: 'Priority System', x: 32, y: 42, parent: 'reconciler',
+            functions: [
+              { name: 'requestUpdateLane()', desc: 'Determines the appropriate lane for the current update context', tags: ['core'] },
+              { name: 'mergeLanes()', desc: 'Combines multiple lane bitmasks using bitwise OR', tags: ['core'] },
+              { name: 'getNextLanes()', desc: 'Selects the highest priority lanes to work on next', tags: ['core'] },
+            ],
+            description: 'Lane-based scheduling uses bitmasks to represent update priorities, enabling concurrent rendering with fine-grained control.'
+          },
+          {
+            id: 'effects', icon: '\u26A1', label: 'Effects', sub: 'Side Effects', x: 42, y: 55, parent: 'hooks',
+            functions: [
+              { name: 'commitHookEffectListMount()', desc: 'Runs effect mount callbacks during the commit phase', tags: ['core'] },
+              { name: 'commitHookEffectListUnmount()', desc: 'Runs effect cleanup callbacks', tags: ['core'] },
+              { name: 'flushPassiveEffects()', desc: 'Flushes queued passive effects asynchronously', tags: ['core'] },
+            ],
+            description: 'Effects coordination manages passive effects (useEffect), layout effects (useLayoutEffect), and cleanup between renders.'
+          },
+          {
+            id: 'suspense', icon: '\u23F3', label: 'Suspense', sub: 'Async Boundaries', x: 58, y: 55, parent: 'hooks',
+            functions: [
+              { name: 'throwException()', desc: 'Catches promises thrown during render to trigger Suspense boundaries', tags: ['core'] },
+              { name: 'retryTimedOutBoundary()', desc: 'Retries rendering when a Suspense promise resolves', tags: ['core'] },
+            ],
+            description: 'Suspense handles asynchronous dependencies by showing fallback UI while content loads, integrated with streaming SSR.'
+          },
+          {
+            id: 'flight', icon: '\u2708\uFE0F', label: 'Flight', sub: 'RSC Protocol', x: 73, y: 42, parent: 'ssr',
+            functions: [
+              { name: 'renderToReadableStream()', desc: 'Serializes Server Component tree to a stream for the client', tags: ['api', 'render'] },
+              { name: 'createFromFetch()', desc: 'Client-side deserialization of the Flight wire format', tags: ['api'] },
+            ],
+            description: 'React Flight is the wire protocol for Server Components, handling serialization of the component tree between server and client.'
+          },
+          {
+            id: 'compiler', icon: '\uD83D\uDD27', label: 'Compiler', sub: 'Optimization', x: 90, y: 42, parent: 'ssr',
+            functions: [
+              { name: 'compileFn()', desc: 'Main entry point that compiles a React function component', tags: ['core'] },
+              { name: 'inferReactivePlaces()', desc: 'Analyzes which values are reactive and need memoization', tags: ['core'] },
+              { name: 'buildReactiveScopes()', desc: 'Groups reactive values into memoization scopes', tags: ['core'] },
+            ],
+            description: 'The React Compiler automatically optimizes re-renders by analyzing component code and inserting memoization at build time.'
+          },
+        ]
+      },
+      flask: {
+        root: { id: 'root', icon: '\uD83C\uDF76', label: 'Flask', sub: 'pallets/flask', x: 50, y: 5 },
+        children: [
+          {
+            id: 'app', icon: '\uD83D\uDCE6', label: 'App Object', sub: 'Core Application', x: 20, y: 22,
+            functions: [
+              { name: 'Flask(__name__)', desc: 'Creates the WSGI application, manages routing and configuration', tags: ['core', 'api'] },
+              { name: '@app.route()', desc: 'Decorator to associate URL rules with view functions', tags: ['api'] },
+              { name: 'app.config', desc: 'Dictionary-like object for application configuration', tags: ['api'] },
+              { name: 'app.run()', desc: 'Starts the development server on the given host/port', tags: ['api'] },
+            ],
+            description: 'The Flask Application object is the central WSGI application managing URL routing, view functions, error handlers, and configuration.'
+          },
+          {
+            id: 'context', icon: '\uD83D\uDD04', label: 'Context System', sub: 'Thread-Safe Proxies', x: 50, y: 22,
+            functions: [
+              { name: 'current_app', desc: 'Proxy to the currently active Flask application instance', tags: ['api'] },
+              { name: 'g', desc: 'Object for storing request-scoped global data', tags: ['api'] },
+              { name: 'request', desc: 'Proxy to the incoming HTTP request data', tags: ['api'] },
+              { name: 'session', desc: 'Proxy to the current user session data', tags: ['api'] },
+            ],
+            description: 'Flask uses a context system providing thread-safe proxy objects for accessing application and request-specific data without explicit passing.'
+          },
+          {
+            id: 'blueprints', icon: '\uD83D\uDDC2\uFE0F', label: 'Blueprints', sub: 'Modular Components', x: 80, y: 22,
+            functions: [
+              { name: 'Blueprint()', desc: 'Creates a modular component for organizing routes and handlers', tags: ['core', 'api'] },
+              { name: 'register_blueprint()', desc: 'Registers a blueprint with the main Flask application', tags: ['api'] },
+              { name: 'url_prefix', desc: 'Prefix for all routes in the blueprint', tags: ['api'] },
+            ],
+            description: 'Blueprints allow organizing Flask applications into modular, reusable components with their own routes, templates, and static files.'
+          },
+        ],
+        level2: [
+          {
+            id: 'routing', icon: '\uD83D\uDEE4\uFE0F', label: 'Routing', sub: 'URL Rules', x: 12, y: 42, parent: 'app',
+            functions: [
+              { name: 'add_url_rule()', desc: 'Programmatic route registration with endpoint binding', tags: ['core'] },
+              { name: 'url_for()', desc: 'Generates URL for a given endpoint with parameters', tags: ['api'] },
+            ],
+            description: 'The routing system maps URL patterns to view functions using Werkzeug\'s URL routing.'
+          },
+          {
+            id: 'errors', icon: '\u26A0\uFE0F', label: 'Error Handling', sub: 'HTTP Errors', x: 30, y: 42, parent: 'app',
+            functions: [
+              { name: '@app.errorhandler()', desc: 'Registers custom error handlers for HTTP status codes', tags: ['api'] },
+              { name: 'abort()', desc: 'Raises an HTTP exception with the given status code', tags: ['api'] },
+            ],
+            description: 'Error handling system for registering custom handlers for HTTP errors and application exceptions.'
+          },
+          {
+            id: 'templates', icon: '\uD83D\uDCC4', label: 'Templates', sub: 'Jinja2 Rendering', x: 50, y: 42, parent: 'context',
+            functions: [
+              { name: 'render_template()', desc: 'Renders a Jinja2 template with the given context variables', tags: ['api'] },
+              { name: 'render_template_string()', desc: 'Renders a template from a string source', tags: ['api'] },
+            ],
+            description: 'Template rendering powered by Jinja2, providing HTML generation with template inheritance and filters.'
+          },
+          {
+            id: 'cli', icon: '\u2328\uFE0F', label: 'CLI', sub: 'Click Commands', x: 70, y: 42, parent: 'blueprints',
+            functions: [
+              { name: '@app.cli.command()', desc: 'Registers a custom CLI command using Click integration', tags: ['api'] },
+              { name: 'flask run', desc: 'Built-in command to start the development server', tags: ['api'] },
+            ],
+            description: 'Flask\'s CLI system built on Click provides built-in commands and extensibility for custom management commands.'
+          },
+          {
+            id: 'testing', icon: '\uD83E\uDDEA', label: 'Testing', sub: 'Test Client', x: 88, y: 42, parent: 'blueprints',
+            functions: [
+              { name: 'app.test_client()', desc: 'Creates a test client for simulating HTTP requests', tags: ['api'] },
+              { name: 'app.test_request_context()', desc: 'Creates a request context for testing outside of requests', tags: ['api'] },
+            ],
+            description: 'Testing utilities including a test client for simulating requests and test request contexts for unit testing.'
+          },
+        ]
+      },
+      threejs: {
+        root: { id: 'root', icon: '\uD83C\uDFAE', label: 'Three.js', sub: 'mrdoob/three.js', x: 50, y: 5 },
+        children: [
+          {
+            id: 'scenegraph', icon: '\uD83C\uDF33', label: 'Scene Graph', sub: 'Object Hierarchy', x: 20, y: 22,
+            functions: [
+              { name: 'Scene()', desc: 'Root container for all objects, lights, and cameras', tags: ['core', 'api'] },
+              { name: 'Object3D()', desc: 'Base class for all scene objects with transform properties', tags: ['core'] },
+              { name: 'add() / remove()', desc: 'Parent-child relationship management for scene hierarchy', tags: ['api'] },
+            ],
+            description: 'The Scene Graph is a hierarchical tree of 3D objects that the renderer traverses to produce the final image.'
+          },
+          {
+            id: 'renderer', icon: '\uD83D\uDDA5\uFE0F', label: 'Renderer', sub: 'WebGL / WebGPU', x: 50, y: 22,
+            functions: [
+              { name: 'WebGLRenderer()', desc: 'Primary renderer using WebGL for cross-browser 3D graphics', tags: ['core', 'render'] },
+              { name: 'render(scene, camera)', desc: 'Renders one frame of the scene from the camera perspective', tags: ['api', 'render'] },
+              { name: 'setPixelRatio()', desc: 'Sets device pixel ratio for HiDPI display support', tags: ['api'] },
+            ],
+            description: 'The rendering engine that processes the scene graph and produces pixels, supporting both WebGL and the newer WebGPU backend.'
+          },
+          {
+            id: 'materials', icon: '\uD83C\uDFA8', label: 'Materials', sub: 'Shaders & Textures', x: 80, y: 22,
+            functions: [
+              { name: 'MeshStandardMaterial()', desc: 'PBR material with metalness/roughness workflow', tags: ['api'] },
+              { name: 'ShaderMaterial()', desc: 'Custom material with user-defined vertex/fragment shaders', tags: ['api'] },
+              { name: 'NodeMaterial()', desc: 'New node-based material system for WebGPU', tags: ['api'] },
+            ],
+            description: 'Materials define the visual appearance of objects, from simple colors to complex physically-based rendering with custom shaders.'
+          },
+        ],
+        level2: [
+          {
+            id: 'geometry', icon: '\uD83D\uDCDB', label: 'Geometry', sub: 'BufferGeometry', x: 10, y: 42, parent: 'scenegraph',
+            functions: [
+              { name: 'BufferGeometry()', desc: 'Efficient geometry representation using typed arrays', tags: ['core'] },
+              { name: 'BoxGeometry()', desc: 'Creates box/cube geometry with configurable dimensions', tags: ['api'] },
+              { name: 'computeVertexNormals()', desc: 'Auto-calculates smooth normals from geometry', tags: ['core'] },
+            ],
+            description: 'Geometry system based on BufferGeometry for efficient GPU data transfer using typed arrays.'
+          },
+          {
+            id: 'camera', icon: '\uD83D\uDCF7', label: 'Camera', sub: 'Projection', x: 30, y: 42, parent: 'scenegraph',
+            functions: [
+              { name: 'PerspectiveCamera()', desc: 'Camera with perspective projection (like human eye)', tags: ['api'] },
+              { name: 'OrthographicCamera()', desc: 'Camera with orthographic projection (no perspective)', tags: ['api'] },
+            ],
+            description: 'Camera objects define how the 3D scene is projected onto the 2D screen.'
+          },
+          {
+            id: 'lights', icon: '\uD83D\uDCA1', label: 'Lights', sub: 'Illumination', x: 50, y: 42, parent: 'renderer',
+            functions: [
+              { name: 'DirectionalLight()', desc: 'Parallel light rays simulating distant light sources like the sun', tags: ['api'] },
+              { name: 'PointLight()', desc: 'Omnidirectional light emitting from a single point', tags: ['api'] },
+              { name: 'AmbientLight()', desc: 'Uniform light affecting all objects equally', tags: ['api'] },
+            ],
+            description: 'Light objects control scene illumination, from ambient to physically-accurate area lights.'
+          },
+          {
+            id: 'loaders', icon: '\uD83D\uDCE5', label: 'Loaders', sub: 'Asset Pipeline', x: 70, y: 42, parent: 'materials',
+            functions: [
+              { name: 'GLTFLoader()', desc: 'Loads 3D models in the glTF format (industry standard)', tags: ['api'] },
+              { name: 'TextureLoader()', desc: 'Loads image files as GPU textures', tags: ['api'] },
+              { name: 'LoadingManager()', desc: 'Tracks loading progress across multiple assets', tags: ['core'] },
+            ],
+            description: 'Asset loading system supporting 3D models (glTF, OBJ, FBX), textures, fonts, and more.'
+          },
+          {
+            id: 'animation', icon: '\uD83C\uDFAC', label: 'Animation', sub: 'Keyframes', x: 90, y: 42, parent: 'materials',
+            functions: [
+              { name: 'AnimationMixer()', desc: 'Controls playback of animations on a specific object', tags: ['api'] },
+              { name: 'AnimationClip()', desc: 'Defines a set of keyframe tracks for animation', tags: ['core'] },
+              { name: 'Clock()', desc: 'Tracks elapsed time for consistent animation speed', tags: ['api'] },
+            ],
+            description: 'Animation system with keyframe tracks, mixers for playback control, and morph targets for shape animation.'
+          },
+        ]
+      }
+    };
+
+    // ===== RENDER TREE =====
+    let activeNode = null;
+
+    function renderTree(repoKey) {
+      const container = document.getElementById('treeContainer');
+      const data = treeData[repoKey];
+      if (!data) return;
+
+      container.innerHTML = '';
+
+      // Create SVG for lines
+      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svg.classList.add('tree-svg');
+      svg.setAttribute('preserveAspectRatio', 'none');
+      container.appendChild(svg);
+
+      const allNodes = [data.root, ...data.children, ...data.level2];
+      const nodeEls = {};
+
+      // Create node elements
+      allNodes.forEach(node => {
+        const el = document.createElement('div');
+        el.className = 'tree-node';
+        el.style.left = node.x + '%';
+        el.style.top = node.y + '%';
+        el.style.transform = 'translate(-50%, 0)';
+        el.innerHTML = `
+          <div class="node-inner">
+            <div class="node-icon">${node.icon}</div>
+            <div class="node-label">${node.label}</div>
+            <div class="node-sublabel">${node.sub}</div>
+          </div>
+        `;
+
+        if (node.functions) {
+          el.addEventListener('click', () => openNodePopup(node));
+        }
+
+        container.appendChild(el);
+        nodeEls[node.id] = el;
+      });
+
+      // Draw lines after layout
+      requestAnimationFrame(() => {
+        const containerRect = container.getBoundingClientRect();
+        svg.setAttribute('viewBox', `0 0 ${containerRect.width} ${containerRect.height}`);
+        svg.style.width = containerRect.width + 'px';
+        svg.style.height = containerRect.height + 'px';
+
+        // Root to children lines
+        data.children.forEach(child => {
+          drawLine(svg, nodeEls['root'], nodeEls[child.id], containerRect);
+        });
+
+        // Children to level2 lines
+        data.level2.forEach(l2 => {
+          if (nodeEls[l2.parent]) {
+            drawLine(svg, nodeEls[l2.parent], nodeEls[l2.id], containerRect);
+          }
+        });
+      });
+    }
+
+    function drawLine(svg, fromEl, toEl, containerRect) {
+      const fromRect = fromEl.querySelector('.node-inner').getBoundingClientRect();
+      const toRect = toEl.querySelector('.node-inner').getBoundingClientRect();
+
+      const x1 = fromRect.left + fromRect.width / 2 - containerRect.left;
+      const y1 = fromRect.top + fromRect.height - containerRect.top;
+      const x2 = toRect.left + toRect.width / 2 - containerRect.left;
+      const y2 = toRect.top - containerRect.top;
+
+      const midY = (y1 + y2) / 2;
+
+      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      path.setAttribute('d', `M ${x1} ${y1} C ${x1} ${midY}, ${x2} ${midY}, ${x2} ${y2}`);
+      path.classList.add('tree-line');
+      svg.appendChild(path);
+    }
+
+    function openNodePopup(node) {
+      // Set active state
+      document.querySelectorAll('.tree-node').forEach(n => n.classList.remove('active'));
+      event.currentTarget.classList.add('active');
+      activeNode = node;
+
+      // Populate popup
+      document.getElementById('popupIcon').textContent = node.icon;
+      document.getElementById('popupTitle').textContent = node.label;
+      document.getElementById('popupDesc').textContent = node.description || '';
+
+      const funcsContainer = document.getElementById('popupFunctions');
+      funcsContainer.innerHTML = '';
+
+      if (node.functions) {
+        node.functions.forEach(fn => {
+          const item = document.createElement('div');
+          item.className = 'func-item';
+          item.innerHTML = `
+            <div class="func-name">${fn.name}</div>
+            <div class="func-desc">${fn.desc}</div>
+            <div>${fn.tags.map(t => `<span class="func-tag ${t}">${t}</span>`).join('')}</div>
+          `;
+          funcsContainer.appendChild(item);
+        });
+      }
+
+      document.getElementById('nodePopup').classList.add('open');
+    }
+
+    document.getElementById('popupClose').addEventListener('click', () => {
+      document.getElementById('nodePopup').classList.remove('open');
+      document.querySelectorAll('.tree-node').forEach(n => n.classList.remove('active'));
+      activeNode = null;
+    });
+
+    // Close popup on escape
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
+        document.getElementById('nodePopup').classList.remove('open');
+        document.querySelectorAll('.tree-node').forEach(n => n.classList.remove('active'));
+      }
+    });
+
+    // ===== REPO SELECTOR =====
+    document.querySelectorAll('.repo-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        document.querySelectorAll('.repo-chip').forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        renderTree(chip.dataset.repo);
+      });
+    });
+
+    // ===== SCROLL ANIMATIONS =====
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+    // Nav scroll effect
+    window.addEventListener('scroll', () => {
+      document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 50);
+    });
+
+    // ===== LOADING =====
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        document.getElementById('loader').classList.add('hidden');
+        renderTree('react');
+      }, 800);
+    });
+  </script>
+</body>
+</html>
