@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CodeGuard Dashboard — Live PR Review</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@600;700;800&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg-primary: #0f1117;
+    --bg-secondary: #12131a;
+    --bg-card: #16171f;
+    --bg-input: #0f1117;
+    --border: #1e1f2e;
+    --text-primary: #f1f5f9;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    --text-dim: #3f4050;
+    --indigo: #6366f1;
+    --purple: #8b5cf6;
+    --cyan: #00d4ff;
+    --green: #10b981;
+    --red: #ef4444;
+    --yellow: #f59e0b;
+    --pink: #ff006e;
+    --neon: #00ff88;
+  }
+
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    height: 100vh;
+    display: flex;
+    overflow: hidden;
+  }
+
+  /* Sidebar */
+  .sidebar {
+    width: 240px;
+    min-width: 240px;
+    background: var(--bg-secondary);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
+
+  .logo {
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .logo span:first-child { font-size: 20px; }
+  .logo .name { font-family: 'Space Grotesk', sans-serif; font-weight: 800; font-size: 16px; }
+  .logo .ver { color: var(--indigo); font-size: 9px; font-weight: 600; }
+
+  .nav { padding: 12px 12px; flex: 1; }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 14px; border-radius: 8px;
+    color: var(--text-muted); font-size: 13px; font-weight: 500;
+    cursor: pointer; transition: all 0.2s; position: relative;
+    margin-bottom: 2px;
+  }
+  .nav-item:hover { background: rgba(99,102,241,0.06); color: var(--text-secondary); }
+  .nav-item.active {
+    background: rgba(99,102,241,0.1); color: var(--indigo);
+  }
+  .nav-item.active::before {
+    content: ''; position: absolute; left: 0; top: 0;
+    width: 3px; height: 100%; background: var(--indigo); border-radius: 2px;
+  }
+  .nav-item .icon { font-size: 14px; width: 20px; text-align: center; }
+  .nav-item .badge {
+    margin-left: auto; background: var(--red); color: white;
+    font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 10px;
+  }
+
+  .section-label {
+    color: var(--text-dim); font-size: 10px; font-weight: 600;
+    letter-spacing: 1.5px; padding: 16px 14px 8px;
+  }
+
+  .collection-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 6px 14px; font-size: 12px; color: var(--text-secondary);
+  }
+  .collection-dot { width: 12px; height: 12px; border-radius: 50%; border: 1.5px solid; background: transparent; }
+  .collection-count { margin-left: auto; font-weight: 600; font-size: 11px; }
+
+  .mode-indicator {
+    margin: 8px 12px; padding: 8px 14px; border-radius: 8px;
+    display: flex; align-items: center; gap: 8px;
+    font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.2s;
+  }
+  .mode-indicator.auto { background: rgba(16,185,129,0.06); border: 1px solid rgba(16,185,129,0.2); color: var(--green); }
+  .mode-indicator.heuristic { background: rgba(0,212,255,0.06); border: 1px solid rgba(0,212,255,0.2); color: var(--cyan); }
+  .mode-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+  .user-card {
+    margin: auto 12px 12px; padding: 10px 12px; border-radius: 8px;
+    background: var(--bg-card); display: flex; align-items: center; gap: 10px;
+  }
+  .user-avatar {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: rgba(99,102,241,0.15); border: 1px solid var(--indigo);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 700; color: #a78bfa;
+  }
+  .user-name { font-size: 11px; font-weight: 600; }
+  .user-role { font-size: 9px; color: var(--text-muted); }
+
+  /* Main content */
+  .main {
+    flex: 1; display: flex; flex-direction: column; overflow: hidden;
+  }
+
+  .topbar {
+    padding: 0 28px; height: 56px; min-height: 56px;
+    display: flex; align-items: center; gap: 16px;
+    border-bottom: 1px solid var(--border); background: var(--bg-secondary);
+  }
+  .topbar h1 { font-size: 16px; font-weight: 700; }
+  .topbar .sep { color: var(--text-muted); font-size: 12px; }
+  .search-bar {
+    margin-left: auto; width: 260px; padding: 6px 14px;
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 8px; color: var(--text-dim); font-size: 11px;
+    outline: none; font-family: inherit; transition: border 0.2s;
+  }
+  .search-bar:focus { border-color: var(--indigo); color: var(--text-secondary); }
+  .notif {
+    position: relative; width: 32px; height: 32px; border-radius: 50%;
+    background: var(--bg-card); border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; font-size: 14px;
+  }
+  .notif .count {
+    position: absolute; top: -2px; right: -2px;
+    width: 14px; height: 14px; border-radius: 50%;
+    background: var(--red); color: white; font-size: 8px;
+    font-weight: 700; display: flex; align-items: center; justify-content: center;
+  }
+
+  .content { flex: 1; overflow-y: auto; padding: 20px 28px; }
+
+  /* Stat Cards */
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 20px; }
+  .stat-card {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 12px; padding: 18px 20px; position: relative;
+    transition: transform 0.2s, border-color 0.2s;
+  }
+  .stat-card:hover { transform: translateY(-2px); border-color: #2e2f3e; }
+  .stat-label { font-size: 11px; color: var(--text-muted); font-weight: 500; }
+  .stat-value { font-size: 32px; font-weight: 800; margin: 6px 0 0; display: inline-block; }
+  .stat-badge { display: inline-block; padding: 2px 8px; border-radius: 5px; font-size: 9px; font-weight: 600; margin-left: 8px; vertical-align: middle; }
+  .stat-icon { position: absolute; right: 16px; bottom: 12px; font-size: 24px; opacity: 0.6; }
+
+  /* Main grid */
+  .main-grid { display: grid; grid-template-columns: 1fr 380px; gap: 16px; margin-bottom: 20px; }
+
+  /* Panel */
+  .panel {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 14px; padding: 20px;
+  }
+  .panel-header {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 16px;
+  }
+  .panel-title { font-size: 14px; font-weight: 700; }
+  .panel-badge {
+    padding: 3px 10px; border-radius: 5px; font-size: 9px; font-weight: 600;
+  }
+  .panel-subtitle { margin-left: auto; font-size: 10px; color: var(--text-muted); }
+
+  /* PR info */
+  .pr-info {
+    background: var(--bg-input); border-radius: 8px; padding: 10px 14px;
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+    margin-bottom: 14px;
+  }
+  .pr-number { color: #a78bfa; font-family: 'JetBrains Mono', monospace; font-weight: 600; font-size: 12px; }
+  .pr-title { color: var(--text-primary); font-size: 12px; font-weight: 600; flex: 1; }
+  .pr-tag { padding: 3px 10px; border-radius: 6px; font-size: 9px; font-weight: 600; }
+
+  /* Violation cards */
+  .violation {
+    border-radius: 10px; padding: 14px 16px; margin-bottom: 10px;
+    display: flex; gap: 12px; align-items: flex-start;
+    transition: all 0.4s; overflow: hidden; max-height: 200px;
+  }
+  .violation.dismissed { max-height: 0; padding: 0 16px; opacity: 0; margin-bottom: 0; }
+  .violation.error { background: rgba(239,68,68,0.03); border: 1px solid rgba(239,68,68,0.15); }
+  .violation.warning { background: rgba(245,158,11,0.03); border: 1px solid rgba(245,158,11,0.15); }
+  .violation-icon {
+    width: 24px; height: 24px; border-radius: 50%; display: flex;
+    align-items: center; justify-content: center; font-size: 11px;
+    font-weight: 700; flex-shrink: 0; margin-top: 2px;
+  }
+  .violation.error .violation-icon { background: rgba(239,68,68,0.1); border: 1.5px solid var(--red); color: var(--red); }
+  .violation.warning .violation-icon { background: rgba(245,158,11,0.1); border: 1.5px solid var(--yellow); color: var(--yellow); }
+  .violation-body { flex: 1; }
+  .violation-title { font-size: 12px; font-weight: 600; margin-bottom: 4px; }
+  .violation-text { font-size: 10px; color: var(--text-secondary); line-height: 1.5; }
+  .violation-meta { font-size: 9px; color: var(--text-muted); margin-top: 4px; }
+  .dismiss-btn {
+    padding: 5px 14px; border-radius: 6px; background: var(--border);
+    border: 1px solid #2e2f3e; color: var(--text-secondary);
+    font-size: 9px; font-weight: 600; cursor: pointer;
+    transition: all 0.2s; white-space: nowrap; align-self: flex-start;
+    font-family: inherit;
+  }
+  .dismiss-btn:hover { background: #2e2f3e; }
+
+  /* Code diff */
+  .code-diff {
+    background: #0a0b10; border: 1px solid var(--border);
+    border-radius: 10px; padding: 12px 16px;
+    font-family: 'JetBrains Mono', monospace; font-size: 11px; margin-top: 10px;
+  }
+  .code-diff .filepath { color: var(--text-muted); font-size: 9px; margin-bottom: 6px; }
+  .code-diff .del { color: var(--red); }
+  .code-diff .add { color: var(--green); }
+
+  /* Similar functions */
+  .func-match {
+    background: var(--bg-input); border-radius: 8px; padding: 10px 14px;
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 6px;
+  }
+  .func-name { color: var(--cyan); font-family: 'JetBrains Mono', monospace; font-size: 10px; }
+  .sim-score { padding: 3px 10px; border-radius: 5px; font-size: 9px; font-weight: 600; }
+
+  /* Guideline items */
+  .guideline-item {
+    border-radius: 8px; padding: 10px 14px; margin-bottom: 6px;
+    display: flex; align-items: center; gap: 10px; cursor: pointer;
+    transition: background 0.2s;
+  }
+  .guideline-item:hover { background: rgba(255,255,255,0.02); }
+  .guideline-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .guideline-title { font-size: 10px; font-weight: 600; }
+  .guideline-meta { font-size: 9px; color: var(--text-muted); }
+
+  /* Activity feed */
+  .activity { margin-top: 0; }
+  .activity-item {
+    background: var(--bg-input); border-radius: 8px;
+    padding: 10px 16px; margin-bottom: 6px;
+    display: flex; align-items: center; gap: 12px;
+    animation: fadeInUp 0.3s ease;
+  }
+  .activity-type { font-size: 10px; font-weight: 600; min-width: 70px; }
+  .activity-text { font-size: 11px; color: var(--text-secondary); flex: 1; }
+  .activity-time { font-size: 9px; color: var(--text-dim); white-space: nowrap; }
+
+  /* Toast */
+  .toast {
+    position: fixed; bottom: 24px; right: 24px;
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 10px; padding: 12px 20px;
+    font-size: 12px; color: var(--text-secondary);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    transform: translateY(100px); opacity: 0;
+    transition: all 0.3s ease; z-index: 100;
+  }
+  .toast.visible { transform: translateY(0); opacity: 1; }
+
+  /* Simulate button */
+  .sim-btn {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 20px; border-radius: 8px;
+    background: linear-gradient(135deg, var(--indigo), var(--purple));
+    border: none; color: white; font-size: 12px; font-weight: 600;
+    cursor: pointer; font-family: inherit; transition: opacity 0.2s;
+    margin-top: 14px;
+  }
+  .sim-btn:hover { opacity: 0.9; }
+  .sim-btn:disabled { opacity: 0.5; cursor: default; }
+
+  /* Pipeline sim overlay */
+  .pipeline-sim {
+    display: none; margin-top: 14px; padding: 16px;
+    background: var(--bg-input); border-radius: 10px;
+    border: 1px solid var(--border);
+  }
+  .pipeline-sim.visible { display: block; animation: fadeInUp 0.3s ease; }
+  .sim-step {
+    display: flex; align-items: center; gap: 10px;
+    padding: 6px 0; font-size: 11px; color: var(--text-muted);
+    opacity: 0.3; transition: all 0.3s;
+  }
+  .sim-step.active { opacity: 1; color: var(--text-secondary); }
+  .sim-step.done { opacity: 1; color: var(--green); }
+  .sim-step .dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: var(--text-dim); transition: background 0.3s;
+  }
+  .sim-step.active .dot { background: var(--yellow); animation: pulse 1s infinite; }
+  .sim-step.done .dot { background: var(--green); }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes countUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .right-panels { display: flex; flex-direction: column; gap: 16px; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="logo">
+    <span>🛡️</span>
+    <span class="name">CodeGuard</span>
+    <span class="ver">v1.0</span>
+  </div>
+  <nav class="nav">
+    <div class="nav-item active"><span class="icon">📊</span>Dashboard</div>
+    <div class="nav-item"><span class="icon">🔍</span>PR Reviews<span class="badge">3</span></div>
+    <div class="nav-item"><span class="icon">📚</span>Guidelines</div>
+    <div class="nav-item"><span class="icon">🌳</span>Architecture</div>
+    <div class="nav-item"><span class="icon">📡</span>Signal Analysis</div>
+    <div class="nav-item"><span class="icon">👤</span>Intern View</div>
+
+    <div class="section-label">COLLECTIONS</div>
+    <div class="collection-item">
+      <div class="collection-dot" style="border-color: var(--green);"></div>
+      Positive Patterns
+      <span class="collection-count" style="color: var(--green);" id="pos-count">247</span>
+    </div>
+    <div class="collection-item">
+      <div class="collection-dot" style="border-color: var(--red);"></div>
+      Negative Patterns
+      <span class="collection-count" style="color: var(--red);" id="neg-count">89</span>
+    </div>
+
+    <div class="section-label">MODE</div>
+    <div class="mode-indicator auto" id="mode-toggle" title="Click to toggle mode">
+      <div class="mode-dot" style="background: var(--green);"></div>
+      <span id="mode-text">Auto Mode Active</span>
+    </div>
+  </nav>
+  <div class="user-card">
+    <div class="user-avatar">BM</div>
+    <div>
+      <div class="user-name">Bhavika M.</div>
+      <div class="user-role">Project Context Lead</div>
+    </div>
+  </div>
+</aside>
+
+<!-- Main -->
+<main class="main">
+  <header class="topbar">
+    <h1>Dashboard</h1>
+    <span class="sep">| Last updated <span id="update-time">just now</span></span>
+    <input class="search-bar" placeholder="Search guidelines, PRs..." type="text" id="search">
+    <div class="notif">🔔<span class="count" id="notif-count">3</span></div>
+  </header>
+
+  <div class="content">
+    <!-- Stats -->
+    <div class="stats">
+      <div class="stat-card">
+        <div class="stat-label">PRs Reviewed Today</div>
+        <span class="stat-value" data-target="12">0</span>
+        <span class="stat-badge" style="background: rgba(16,185,129,0.1); color: var(--green);">+33%</span>
+        <div class="stat-icon">📋</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Violations Caught</div>
+        <span class="stat-value" data-target="7">0</span>
+        <span class="stat-badge" style="background: rgba(245,158,11,0.1); color: var(--yellow);">3 critical</span>
+        <div class="stat-icon">⚠️</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">New Guidelines Learned</div>
+        <span class="stat-value" data-target="4">0</span>
+        <span class="stat-badge" style="background: rgba(99,102,241,0.1); color: #a78bfa;">2 pos / 2 neg</span>
+        <div class="stat-icon">📚</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Knowledge Coverage</div>
+        <span class="stat-value" data-target="73" data-suffix="%">0</span>
+        <span class="stat-badge" style="background: rgba(16,185,129,0.1); color: var(--green);">+8%</span>
+        <div class="stat-icon">🧠</div>
+      </div>
+    </div>
+
+    <!-- Main grid -->
+    <div class="main-grid">
+      <!-- Left: PR Review -->
+      <div class="panel">
+        <div class="panel-header">
+          <span class="panel-title">Active PR Review</span>
+          <span class="panel-badge" style="background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.3); color: var(--yellow);">LIVE</span>
+        </div>
+
+        <div class="pr-info">
+          <span class="pr-number">#347</span>
+          <span class="pr-title">fix: move payment logic from route to service layer</span>
+          <span class="pr-tag" style="background: rgba(245,158,11,0.1); color: var(--yellow);">2 issues</span>
+          <span class="pr-tag" style="background: rgba(99,102,241,0.1); color: #a78bfa;">Python</span>
+          <span class="pr-tag" style="background: rgba(16,185,129,0.1); color: var(--green);">intern-1</span>
+        </div>
+
+        <div class="violation error" id="v1">
+          <div class="violation-icon">!</div>
+          <div class="violation-body">
+            <div class="violation-title">Broad exception handling in payment route</div>
+            <div class="violation-text">Guideline: "Avoid broad exception handling in route files. Use specific exception types so failures are visible to new contributors."</div>
+            <div class="violation-meta">Source: commit abc1234 by senior-dev | Confidence: high | Collection: negative</div>
+          </div>
+          <button class="dismiss-btn" onclick="dismissViolation('v1')">Dismiss</button>
+        </div>
+
+        <div class="violation warning" id="v2">
+          <div class="violation-icon">⚡</div>
+          <div class="violation-body">
+            <div class="violation-title">Business logic detected in route handler</div>
+            <div class="violation-text">Guideline: "Keep business logic in clear, reusable modules instead of scattering it across route handlers."</div>
+            <div class="violation-meta">Source: commit def5678 by tech-lead | Confidence: high | Collection: negative</div>
+          </div>
+          <button class="dismiss-btn" onclick="dismissViolation('v2')">Dismiss</button>
+        </div>
+
+        <div class="code-diff">
+          <div class="filepath">routes/payment.py:45</div>
+          <div class="del">- except:</div>
+          <div class="add">+ except PaymentError as e:</div>
+          <div class="add">+     logger.error(f"Payment failed: {e}")</div>
+        </div>
+
+        <button class="sim-btn" id="sim-btn" onclick="runSimulation()">
+          ▶ Simulate PR Review Pipeline
+        </button>
+
+        <div class="pipeline-sim" id="pipeline-sim">
+          <div class="sim-step" data-step="0"><div class="dot"></div>Extracting AST diff with tree-sitter...</div>
+          <div class="sim-step" data-step="1"><div class="dot"></div>Filtering whitespace and auto-generated changes...</div>
+          <div class="sim-step" data-step="2"><div class="dot"></div>Embedding changed function bodies...</div>
+          <div class="sim-step" data-step="3"><div class="dot"></div>Running kNN search (k=5, cosine similarity)...</div>
+          <div class="sim-step" data-step="4"><div class="dot"></div>Retrieving matching guidelines from ChromaDB...</div>
+          <div class="sim-step" data-step="5"><div class="dot"></div>Weighting by similarity, confidence, recency...</div>
+          <div class="sim-step" data-step="6"><div class="dot"></div>Running LLM compliance check (Claude)...</div>
+          <div class="sim-step" data-step="7"><div class="dot"></div>2 violations found! Posting review comments...</div>
+        </div>
+      </div>
+
+      <!-- Right panels -->
+      <div class="right-panels">
+        <div class="panel">
+          <div class="panel-header">
+            <span class="panel-title">Similar Functions Found</span>
+            <span class="panel-subtitle">k=5 neighbors</span>
+          </div>
+          <div class="func-match">
+            <span class="func-name">services/billing.py::process_refund</span>
+            <span class="sim-score" style="background: rgba(16,185,129,0.1); color: var(--green);">0.89</span>
+          </div>
+          <div class="func-match">
+            <span class="func-name">services/order.py::validate_order</span>
+            <span class="sim-score" style="background: rgba(16,185,129,0.1); color: var(--green);">0.82</span>
+          </div>
+          <div class="func-match">
+            <span class="func-name">routes/checkout.py::handle_checkout</span>
+            <span class="sim-score" style="background: rgba(245,158,11,0.1); color: var(--yellow);">0.71</span>
+          </div>
+          <div style="text-align: center; color: var(--text-dim); font-size: 9px; margin-top: 4px;">+ 2 more below threshold (0.5)</div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <span class="panel-title">Recently Learned</span>
+            <span class="panel-subtitle" style="color: var(--indigo); cursor: pointer;">View all →</span>
+          </div>
+          <div class="guideline-item" style="background: rgba(16,185,129,0.03); border: 1px solid rgba(16,185,129,0.1); border-radius: 8px;">
+            <div class="guideline-dot" style="background: var(--green);"></div>
+            <div>
+              <div class="guideline-title">Use service layer for business logic</div>
+              <div class="guideline-meta">positive • high confidence • 2h ago</div>
+            </div>
+          </div>
+          <div class="guideline-item" style="background: rgba(239,68,68,0.03); border: 1px solid rgba(239,68,68,0.1); border-radius: 8px;">
+            <div class="guideline-dot" style="background: var(--red);"></div>
+            <div>
+              <div class="guideline-title">Avoid print() statements in production</div>
+              <div class="guideline-meta">negative • high confidence • 3h ago</div>
+            </div>
+          </div>
+          <div class="guideline-item" style="background: rgba(16,185,129,0.03); border: 1px solid rgba(16,185,129,0.1); border-radius: 8px;">
+            <div class="guideline-dot" style="background: var(--green);"></div>
+            <div>
+              <div class="guideline-title">Handle errors with specific exception types</div>
+              <div class="guideline-meta">positive • medium confidence • 5h ago</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Activity Feed -->
+    <div class="panel activity">
+      <div class="panel-header">
+        <span class="panel-title">Activity Feed</span>
+        <span class="panel-subtitle">Today</span>
+      </div>
+      <div id="activity-list">
+        <div class="activity-item">
+          <span class="activity-type" style="color: var(--green);">LEARNED</span>
+          <span class="activity-text">New positive guideline from PR #345 merge: "Use dependency injection for database connections"</span>
+          <span class="activity-time">14 min ago</span>
+        </div>
+        <div class="activity-item">
+          <span class="activity-type" style="color: var(--yellow);">FLAGGED</span>
+          <span class="activity-text">PR #347: 2 violations detected in routes/payment.py — broad exception + route-layer logic</span>
+          <span class="activity-time">22 min ago</span>
+        </div>
+        <div class="activity-item">
+          <span class="activity-type" style="color: var(--indigo);">INDEXED</span>
+          <span class="activity-text">Re-embedded 3 modified functions from PR #346 merge. Attribute lists preserved.</span>
+          <span class="activity-time">1h ago</span>
+        </div>
+        <div class="activity-item">
+          <span class="activity-type" style="color: var(--red);">DISMISSED</span>
+          <span class="activity-text">Developer dismissed "avoid list comprehension nesting" on utils/helpers.py (3rd dismissal — suppressing)</span>
+          <span class="activity-time">2h ago</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// Count-up animation
+function animateCounters() {
+  document.querySelectorAll('.stat-value').forEach(el => {
+    const target = parseInt(el.dataset.target);
+    const suffix = el.dataset.suffix || '';
+    let current = 0;
+    const step = Math.max(1, Math.floor(target / 30));
+    const interval = setInterval(() => {
+      current += step;
+      if (current >= target) {
+        current = target;
+        clearInterval(interval);
+      }
+      el.textContent = current + suffix;
+    }, 40);
+  });
+}
+setTimeout(animateCounters, 300);
+
+// Dismiss violations
+function dismissViolation(id) {
+  const el = document.getElementById(id);
+  el.classList.add('dismissed');
+  showToast('Violation dismissed — this pattern will be suppressed for similar functions');
+  // Update count
+  const issueTag = document.querySelector('.pr-tag');
+  const count = document.querySelectorAll('.violation:not(.dismissed)').length;
+  setTimeout(() => {
+    if (count <= 1) issueTag.textContent = count + ' issue';
+    else issueTag.textContent = count + ' issues';
+    if (count === 0) issueTag.style.color = 'var(--green)';
+  }, 400);
+  // Add to activity feed
+  addActivity('DISMISSED', `Violation "${el.querySelector('.violation-title').textContent}" dismissed on PR #347`, 'var(--red)');
+}
+
+// Toast
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('visible');
+  setTimeout(() => t.classList.remove('visible'), 3000);
+}
+
+// Mode toggle
+document.getElementById('mode-toggle').addEventListener('click', function() {
+  const isAuto = this.classList.contains('auto');
+  if (isAuto) {
+    this.classList.remove('auto');
+    this.classList.add('heuristic');
+    this.querySelector('.mode-dot').style.background = 'var(--cyan)';
+    document.getElementById('mode-text').textContent = 'Heuristic Mode';
+    showToast('Switched to Heuristic Mode — rules only, no LLM');
+  } else {
+    this.classList.remove('heuristic');
+    this.classList.add('auto');
+    this.querySelector('.mode-dot').style.background = 'var(--green)';
+    document.getElementById('mode-text').textContent = 'Auto Mode Active';
+    showToast('Switched to Auto Mode — LLM + heuristic fallback');
+  }
+});
+
+// Pipeline simulation
+let simRunning = false;
+function runSimulation() {
+  if (simRunning) return;
+  simRunning = true;
+  const btn = document.getElementById('sim-btn');
+  const sim = document.getElementById('pipeline-sim');
+  btn.disabled = true;
+  btn.innerHTML = '⏳ Running Pipeline...';
+  sim.classList.add('visible');
+
+  const steps = sim.querySelectorAll('.sim-step');
+  let i = 0;
+  function nextStep() {
+    if (i > 0) steps[i - 1].classList.remove('active'), steps[i - 1].classList.add('done');
+    if (i < steps.length) {
+      steps[i].classList.add('active');
+      i++;
+      setTimeout(nextStep, 800 + Math.random() * 600);
+    } else {
+      btn.disabled = false;
+      btn.innerHTML = '▶ Run Again';
+      simRunning = false;
+      showToast('Pipeline complete — 2 violations found in 4.2s');
+      addActivity('FLAGGED', 'Simulation complete: 2 violations detected in routes/payment.py', 'var(--yellow)');
+    }
+  }
+  nextStep();
+}
+
+// Add activity item
+function addActivity(type, text, color) {
+  const list = document.getElementById('activity-list');
+  const item = document.createElement('div');
+  item.className = 'activity-item';
+  item.innerHTML = `
+    <span class="activity-type" style="color: ${color};">${type}</span>
+    <span class="activity-text">${text}</span>
+    <span class="activity-time">just now</span>
+  `;
+  list.insertBefore(item, list.firstChild);
+}
+
+// Live activity simulation
+const liveActivities = [
+  { type: 'INDEXED', text: 'Embedded 2 new functions from PR #348 push event.', color: 'var(--indigo)' },
+  { type: 'LEARNED', text: 'New negative guideline: "Avoid raw SQL in controllers — use ORM queries."', color: 'var(--green)' },
+  { type: 'FLAGGED', text: 'PR #349: 1 violation in auth/login.py — missing input validation.', color: 'var(--yellow)' },
+  { type: 'INDEXED', text: 'Auto-cleanup: removed 3 stale guidelines below confidence threshold.', color: 'var(--indigo)' },
+];
+let actIdx = 0;
+setInterval(() => {
+  const a = liveActivities[actIdx % liveActivities.length];
+  addActivity(a.type, a.text, a.color);
+  actIdx++;
+}, 15000);
+
+// Nav clicks
+document.querySelectorAll('.nav-item').forEach(item => {
+  item.addEventListener('click', function() {
+    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+
+// Update time
+setInterval(() => {
+  const el = document.getElementById('update-time');
+  const mins = Math.floor((Date.now() - startTime) / 60000);
+  el.textContent = mins < 1 ? 'just now' : mins + ' min ago';
+}, 30000);
+const startTime = Date.now();
+</script>
+</body>
+</html>
